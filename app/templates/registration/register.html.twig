@@ -4,7 +4,9 @@
 
 {% block body %}
     {% for flash_error in app.flashes('verify_email_error') %}
-        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+        <div class="alert alert-danger" role="alert">
+            {{ flash_error }}
+        </div>
     {% endfor %}
 
     <h1>Register</h1>
@@ -12,12 +14,29 @@
     {{ form_errors(registrationForm) }}
 
     {{ form_start(registrationForm) }}
+
         {{ form_row(registrationForm.email) }}
+
         {{ form_row(registrationForm.plainPassword, {
             label: 'Password'
         }) }}
-        {{ form_row(registrationForm.agreeTerms) }}
 
-        <button type="submit" class="btn">Register</button>
+        <div class="form-check mb-3">
+            {{ form_widget(registrationForm.agreeTerms, {
+                attr: { class: 'form-check-input' }
+            }) }}
+
+            <label class="form-check-label">
+                J'accepte les
+                <a href="{{ asset('doc/cgv.pdf') }}" target="_blank">
+                    conditions générales de vente
+                </a>
+            </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Register
+        </button>
+
     {{ form_end(registrationForm) }}
 {% endblock %}
