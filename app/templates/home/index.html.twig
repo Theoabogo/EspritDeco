@@ -6,7 +6,10 @@
     {% for product in products %}
         <div class="card">
           <h3 class="card-title text-center">
-    {{ product.title }}
+             <a href="{{ path('app_product_show', {id: product.id}) }}">
+        {{ product.title }}
+    </a>
+  
 </h3>
             {% set image = product.getPrincipalImage %}
             {% if image %}
@@ -20,6 +23,7 @@
         <div class="card-bottom d-flex justify-content-between">
              <span class="category">{{ product.category.name }}</span>
             <span class="price">{{ product.price }} €</span>
+            
         </div>
 
         </div>

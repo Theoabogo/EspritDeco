@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="product-card">
+        <h2 class="text-center">{{ product.title }}</h2>
+        <hr style="width:50%; margin:auto;">
+        <p class="text-center text-muted">
+            {{ product.category.name }}
+        </p>
+        <div id="carouselProduct" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                {% for image in product.images %}
+                    {% for image in product.images %}
+    <div class="carousel-item {% if loop.first %}active{% endif %} text-center">
+        <img src="{{ asset(image.path) }}"
+             class="carousel-img"
+             alt="{{ image.alt }}">
+    </div>
+{% endfor %}
+                {% endfor %}
+                {% if product.images|length == 0 %}
+                    <div class="carousel-item active">
+                        <div class="no-image">🚫</div>
+                    </div>
+                {% endif %}
+
+            </div>
+            {% if product.images|length > 1 %}
+                <button class="carousel-control-prev" type="button"
+                        data-bs-target="#carouselProduct" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button"
+                        data-bs-target="#carouselProduct" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            {% endif %}
+
+        </div>
+        <p class="mt-4">{{ product.description }}</p>
+      <div class="bottom-box d-flex justify-content-between align-items-center mt-3">
+    <button type="button" class="btn btn-warning rounded-pill px-4">
+        {{ product.price }} €
+    </button>
+    <button type="button" class="btn btn-outline-warning rounded-pill px-4">
+        Ajouter au panier
+    </button>
+</div>
+    </div>
+
+</div>
+{% endblock %}

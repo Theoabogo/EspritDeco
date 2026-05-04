@@ -80,3 +80,20 @@
         text-align: center;
     }
 }
+
+.card-title a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.main-image {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+}
+.image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;      
+    height: 200px;            
+}
