@@ -1,28 +1,82 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display&family=Poppins&display=swap');
-.logo {
-    font-weight: 700;
-    text-transform: uppercase;
-    font-size: 2.5rem;
-    font-family: inherit;
-}
-
-/* Cibler les mots automatiquement */
-.logo {
-    color: transparent;
-    background: linear-gradient(to right, #0d6efd 0 50%, #dc3545 50% 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-}
-.logo {
+.catalog {
     display: flex;
-    flex-direction: row;
     flex-wrap: wrap;
+    gap: 20px;
+    align-items: stretch;
 }
 
-/* Mobile */
-@media (max-width: 768px) {
-    .logo {
+/* CARD */
+.card {
+    flex: 0 0 calc(25% - 20px); /* Desktop = 4 cartes */
+    display: flex;
+    flex-direction: column;
+    background: #2f4a5a;
+    color: white;
+    border-radius: 10px;
+    overflow: hidden;
+    padding: 10px;
+}
+
+/* IMAGE */
+.card-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+/* NO IMAGE */
+.no-image {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3rem;
+    background: #ccc;
+}
+
+/* DESCRIPTION */
+.card-description {
+    flex-grow: 1;
+}
+
+/* BAS DE CARTE */
+.card-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* BADGE PRIX */
+.price {
+    background: orange;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+/* TABLETTE = 2 cartes */
+@media (max-width: 992px) {
+    .card {
+        flex: 0 0 calc(50% - 20px);
+    }
+}
+
+/* MOBILE = 1 carte */
+@media (max-width: 576px) {
+    .card {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .card-bottom {
         flex-direction: column;
         align-items: center;
+        gap: 5px;
+    }
+
+    .category,
+    .price {
+        text-align: center;
     }
 }
