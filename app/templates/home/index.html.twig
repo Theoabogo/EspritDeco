@@ -1,9 +1,29 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Acceuil{% endblock %}
-
 {% block body %}
+<div class="container mt-5">
+<div class="catalog">
+    {% for product in products %}
+        <div class="card">
+          <h3 class="card-title text-center">
+    {{ product.title }}
+</h3>
+            {% set image = product.getPrincipalImage %}
+            {% if image %}
+                <img src="{{ asset(image.path) }}" alt="{{ image.alt }}" class="card-image">
+            {% else %}
+                <div class="no-image">🚫</div>
+            {% endif %}
+          <p class="card-description text-center">
+    {{ product.description|split(' ')|slice(0, 20)|join(' ') ~ '...' }}
+</p>
+        <div class="card-bottom d-flex justify-content-between">
+             <span class="category">{{ product.category.name }}</span>
+            <span class="price">{{ product.price }} €</span>
+        </div>
 
-
-
+        </div>
+    {% endfor %}
+</div>
+</div>
 {% endblock %}
