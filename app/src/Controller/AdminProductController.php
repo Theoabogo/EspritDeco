@@ -2,6 +2,10 @@
 
 namespace App\Controller;
 
+
+use App\Entity\Product;
+use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\ProductRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,4 +20,17 @@ final class AdminProductController extends AbstractController
             'products' => $productRepository->findAll(),
         ]);
     }
+     #[Route('/admin/products/delete/{id}', name: 'admin_product_delete')]
+     public function delete(Product $product, EntityManagerInterface $em): Response
+     {
+        
+     foreach ($product->getImages() as $image) {
+        $em->remove($image);
+    }
+             $em->remove($product);
+             $em->flush();
+                $this->addFlash('success', 'Produit supprimé avec succès.');
+
+         return $this->redirectToRoute('app_admin_product_list');
+     }
 }
