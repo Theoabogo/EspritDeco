@@ -11,11 +11,11 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class AdminController extends AbstractController
 {
    #[Route('/admin/product', name: 'admin_product_index')]
-#[IsGranted('ROLE_ADMIN')]
+   #[IsGranted('ROLE_ADMIN')]
 public function index(): Response
-{
-    return $this->render('admin/index.html.twig');
-}
+    {
+       return $this->render('admin/index.html.twig');
+    }
 
 
 }
