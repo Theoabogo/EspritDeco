@@ -13,15 +13,26 @@
             <span class="visually-hidden">(current)</span>
           </a>
         </li>
+
+        {% if app.user %}
+        <li class="nav-item">
+          <a class="nav-link" href="{{path('app_logout')}}">Deconnexion</a>
+        </li>
+        {% else %}
         <li class="nav-item">
           <a class="nav-link" href="{{path('app_login')}}">Connexion</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{{path('app_register')}}">Enregistrement</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{{path('app_logout')}}">Deconnexion</a>
-        </li>
+        {% endif %}
+        {% if is_granted('ROLE_ADMIN') %}
+    <li class="nav-item">
+      <a class="nav-link " href="{{ path('admin_product_index') }}">
+        Espace administrateur
+      </a>
+    </li>
+  {% endif %}
       </ul>
       <form class="d-flex">
         <input class="form-control me-sm-2" type="search" placeholder="Search">
