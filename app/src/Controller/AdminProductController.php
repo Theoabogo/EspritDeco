@@ -25,6 +25,10 @@ final class AdminProductController extends AbstractController
      {
         
      foreach ($product->getImages() as $image) {
+         $filePath = $this->getParameter('kernel.project_dir') . '/public/images/' . $image->getPath();
+             if (file_exists($filePath)) {
+            unlink($filePath); 
+        }
         $em->remove($image);
     }
              $em->remove($product);
