@@ -12,7 +12,7 @@ final class AdminController extends AbstractController
 {
    #[Route('/admin/product', name: 'admin_product_index')]
    #[IsGranted('ROLE_ADMIN')]
-public function index(): Response
+    public function index(): Response
     {
        return $this->render('admin/index.html.twig');
     }
