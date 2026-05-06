@@ -11,7 +11,10 @@
 {% endfor %}
 {% endfor %}
 </div>
-
+<h1 class="text-center mb-5">Gestion des produits</h1>
+<div class="text-center my-4">
+    <a href="{{path('admin_product_add')}}" class="text-decoration-none fs-3">✚</a>
+</div>
 <table class="table table-striped table-hover">
     <thead>
         <tr>
@@ -36,7 +39,7 @@
             </td>
 
             <td>
-               <a href="#" class="text-decoration-none">✏️</a>
+               <a href="{{path('admin_product_add')}}" class="text-decoration-none">✏️</a>
             </td>
             <td>
                 <a href="{{ path('admin_product_delete', {'id': product.id}) }}" class = "text-decoration-none" onclick = "return confirm('Etes-vous sur de vouloir supprimer ce produit ?')">
