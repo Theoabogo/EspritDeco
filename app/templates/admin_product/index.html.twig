@@ -39,7 +39,7 @@
             </td>
 
             <td>
-               <a href="{{path('admin_product_add')}}" class="text-decoration-none">✏️</a>
+               <a href="{{path('admin_product_update', {'id': product.id})}}" class="text-decoration-none">✏️</a>
             </td>
             <td>
                 <a href="{{ path('admin_product_delete', {'id': product.id}) }}" class = "text-decoration-none" onclick = "return confirm('Etes-vous sur de vouloir supprimer ce produit ?')">

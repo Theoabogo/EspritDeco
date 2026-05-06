@@ -61,5 +61,24 @@ final class AdminProductController extends AbstractController
         ]);
         
         }
+#[Route('/admin/products/update/{id}', name: 'admin_product_update')]
+public function update(int $id, ProductRepository $productRepository, Request $request, EntityManagerInterface $em): Response
+{
+    $product = $productRepository->find($id);
+    $form = $this->createForm(ProductType::class, $product);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        $em->flush();
+
+        $this->addFlash('success', "L'objet a été mis à jour avec succès.");
+
+        return $this->redirectToRoute('app_admin_product_list');
+    }
+
+    return $this->render('admin_product/update.html.twig', [
+        'form' => $form->createView()
+    ]);
+}
 
 }
