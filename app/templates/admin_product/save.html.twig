@@ -4,17 +4,18 @@
 
 {% block body %}
 
-<h1 class="text-center mb-4">Ajouter  un produit</h1>
-
+<h1 class="text-center mb-4">
+    {{ isEdit ? 'Modifier un produit' : 'Ajouter un produit' }}
+</h1>
 <div class="container">
 
     {{ form_start(form) }}
 
         {{ form_widget(form) }}
 <div class="text-end">
-    <button class="btn btn-success mt-3">
-        Enregistrer
-    </button>
+    <button type="submit" class="btn btn-success mt-3">
+    {{ isEdit ? 'Modifier' : 'Enregistrer' }}
+</button>
 </div>
 
     {{ form_end(form) }}

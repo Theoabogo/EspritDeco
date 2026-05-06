@@ -39,27 +39,30 @@ final class AdminProductController extends AbstractController
          return $this->redirectToRoute('app_admin_product_list');
     }
 
-    #[Route('/admin/products/add', name: 'admin_product_add')]
-    public function add( Request $request, EntityManagerInterface $em):Response
+    #[Route('/admin/products/save/{id}', name: 'admin_product_save', requirements: ['id' => '\d+'], defaults: ['id' => null])]
+    public function save ( ?int $id,Request $request, EntityManagerInterface $em, ?Product $product): Response
     {
+        if (!$product) {
             $product = new Product();
+        }
+
         $form = $this->createForm(ProductType::class, $product);
         $form->handleRequest($request);
 
-        if($form->isSubmitted() && $form->isValid()) {
-            $product= $form->getData();            
+        if ($form->isSubmitted() && $form->isValid()) {
             $em->persist($product);
             $em->flush();
 
-            $this->addFlash('success', "L'objet a été ajouté avec succès.");
+            $this->addFlash('success', 'Produit enregistré avec succès.');
 
             return $this->redirectToRoute('app_admin_product_list');
         }
-        
-        return $this->render('admin_product/form.html.twig', [
-            'form' => $form->createView()
+
+        return $this->render('admin_product/save.html.twig', [
+            'form' => $form->createView(),
+              'isEdit' => $id !== null
+              
         ]);
-        
-        }
+    }
 
 }
