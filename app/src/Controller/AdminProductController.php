@@ -61,6 +61,7 @@ final class AdminProductController extends AbstractController
         return $this->render('admin_product/save.html.twig', [
             'form' => $form->createView(),
               'isEdit' => $id !== null
+              
         ]);
     }
 

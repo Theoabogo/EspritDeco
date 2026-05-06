@@ -4,8 +4,9 @@
 
 {% block body %}
 
-<h1 class="text-center mb-4">Ajouter  un produit</h1>
-
+<h1 class="text-center mb-4">
+    {{ isEdit ? 'Modifier un produit' : 'Ajouter un produit' }}
+</h1>
 <div class="container">
 
     {{ form_start(form) }}
