@@ -2,15 +2,16 @@
 
 namespace App\Controller;
 
-
 use App\Entity\Product;
-use Symfony\Component\HttpFoundation\Request;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Image;
+use App\Form\ProductType;
+use App\Repository\ImageRepository;
 use App\Repository\ProductRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use App\Form\ProductType;
 
 final class AdminProductController extends AbstractController
 {
@@ -21,27 +22,44 @@ final class AdminProductController extends AbstractController
             'products' => $productRepository->findAll(),
         ]);
     }
-     #[Route('/admin/products/delete/{id}', name: 'admin_product_delete')]
-     public function delete(Product $product, EntityManagerInterface $em): Response
+
+    #[Route('/admin/products/delete/{id}', name: 'admin_product_delete')]
+    public function delete(Product $product, EntityManagerInterface $em): Response
     {
-        
-     foreach ($product->getImages() as $image) {
-         $filePath = $this->getParameter('kernel.project_dir') . '/public/' . $image->getPath();
-             if (file_exists($filePath)) {
-            unlink($filePath); 
+        foreach ($product->getImages() as $image) {
+
+            $filePath = $this->getParameter('kernel.project_dir')
+                . '/public/'
+                . $image->getPath();
+
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+
+            $em->remove($image);
         }
-        $em->remove($image);
-    }
-             $em->remove($product);
-             $em->flush();
-                $this->addFlash('success', 'Produit supprimé avec succès.');
 
-         return $this->redirectToRoute('app_admin_product_list');
+        $em->remove($product);
+        $em->flush();
+
+        $this->addFlash('success', 'Produit supprimé avec succès.');
+
+        return $this->redirectToRoute('app_admin_product_list');
     }
 
-    #[Route('/admin/products/save/{id}', name: 'admin_product_save', requirements: ['id' => '\d+'], defaults: ['id' => null])]
-    public function save ( ?int $id,Request $request, EntityManagerInterface $em, ?Product $product): Response
-    {
+    #[Route(
+        '/admin/products/save/{id}',
+        name: 'admin_product_save',
+        requirements: ['id' => '\d+'],
+        defaults: ['id' => null]
+    )]
+    public function save(
+        ?int $id,
+        Request $request,
+        EntityManagerInterface $em,
+        ?Product $product
+    ): Response {
+
         if (!$product) {
             $product = new Product();
         }
@@ -50,6 +68,38 @@ final class AdminProductController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            $files = $form->get('image')->getData();
+
+            $hasImages = count($product->getImages()) > 0;
+
+            if ($files) {
+
+                foreach ($files as $file) {
+
+                    $filename = uniqid() . '.' . $file->guessExtension();
+
+                    $file->move(
+                        $this->getParameter('uploads_dir'),
+                        $filename
+                    );
+
+                    $image = new Image();
+                    $image->setPath('uploads/' . $filename);
+                    $image->setProduct($product);
+                    $image->setAlt('Image du produit ' . $product->getTitle());
+
+                    if (!$hasImages) {
+                        $image->setIsPrincipal(true);
+                        $hasImages = true;
+                    } else {
+                        $image->setIsPrincipal(false);
+                    }
+
+                    $em->persist($image);
+                }
+            }
+
             $em->persist($product);
             $em->flush();
 
@@ -60,9 +110,30 @@ final class AdminProductController extends AbstractController
 
         return $this->render('admin_product/save.html.twig', [
             'form' => $form->createView(),
-              'isEdit' => $id !== null
-              
+            'isEdit' => $id !== null,
+            'product' => $product
         ]);
     }
 
+    #[Route('/admin/image/main/{id}', name: 'admin_image_main', methods: ['POST'])]
+    public function setMainImage(
+        Image $image,
+        EntityManagerInterface $em
+    ): Response {
+
+        $product = $image->getProduct();
+
+        foreach ($product->getImages() as $img) {
+            $img->setIsPrincipal(false);
+        }
+
+        $image->setIsPrincipal(true);
+
+        $em->flush();
+
+        return $this->json([
+            'success' => true,
+            'id' => $image->getId()
+        ]);
+    }
 }
