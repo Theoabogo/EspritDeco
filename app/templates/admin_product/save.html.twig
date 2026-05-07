@@ -7,23 +7,146 @@
 <h1 class="text-center mb-4">
     {{ isEdit ? 'Modifier un produit' : 'Ajouter un produit' }}
 </h1>
+
 <div class="container">
 
     {{ form_start(form) }}
 
-        {{ form_widget(form) }}
-<div class="text-end">
-    <button type="submit" class="btn btn-success mt-3">
-    {{ isEdit ? 'Modifier' : 'Enregistrer' }}
-</button>
-</div>
+        <div class="card p-3 mb-4">
+            {{ form_widget(form) }}
+        </div>
+
+        <div id="images-container" class="mb-3"></div>
+
+        <button type="button"
+                class="btn btn-outline-primary mb-3"
+                id="add-image-btn">
+            + Ajouter une image
+        </button>
+
+        <div class="text-end">
+            <button type="submit" class="btn btn-success">
+                {{ isEdit ? 'Modifier' : 'Enregistrer' }}
+            </button>
+        </div>
 
     {{ form_end(form) }}
 
+    {% if isEdit and product.images|length > 0 %}
+
+        <div class="row mt-3">
+
+            {% for image in product.images %}
+
+                <div class="col-md-3 mb-3 image-block"
+                     data-id="{{ image.id }}">
+
+                    <div class="border p-2 text-center rounded
+                        {{ image.isPrincipal ? 'border-warning border-3' : 'border-secondary' }}">
+
+                        <div class="image-card" data-id="{{ image.id }}">
+
+                            <img src="{{ asset(image.path) }}"
+                                 class="img-fluid mb-2"
+                                 style="height:150px; object-fit:cover;">
+
+                            <div class="principal-badge">
+
+                                {% if image.isPrincipal %}
+                                    <span class="badge bg-warning text-dark mb-2">
+                                        Principal
+                                    </span>
+                                {% endif %}
+
+                            </div>
+
+                            <div class="actions {% if image.isPrincipal %}d-none{% endif %}">
+
+                                <div class="d-flex justify-content-center gap-2">
+
+                                    <button class="btn btn-danger btn-sm delete-image"
+                                            data-id="{{ image.id }}">
+                                        ❌
+                                    </button>
+
+                                    <button class="btn btn-warning btn-sm main-image"
+                                            data-id="{{ image.id }}">
+                                        ⭐
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+
 </div>
+
 <div class="text-center mt-3">
-    <a href="{{ path('admin_product_index') }}" class="btn btn-danger">
+    <a href="{{ path('app_admin_product_list') }}"
+       class="btn btn-danger">
         Retour
     </a>
 </div>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    document.querySelectorAll('.main-image').forEach(btn => {
+
+        btn.addEventListener('click', () => {
+
+            const id = btn.dataset.id;
+
+            fetch('/admin/image/main/' + id, {
+                method: 'POST'
+            })
+            .then(res => res.json())
+            .then(data => {
+
+                if (!data.success) return;
+
+                document.querySelectorAll('.image-block').forEach(block => {
+
+                    block.querySelector('.actions')?.classList.remove('d-none');
+                    block.querySelector('.principal-badge').innerHTML = '';
+
+                    block.querySelector('.border-warning')
+                        ?.classList.remove('border-warning', 'border-3');
+                });
+
+                const current = btn.closest('.image-block');
+
+                current.querySelector('.actions').classList.add('d-none');
+
+                current.querySelector('.principal-badge').innerHTML = `
+                    <span class="badge bg-warning text-dark mb-2">
+                        Principal
+                    </span>
+                `;
+
+                current.querySelector('.border')
+                    ?.classList.add('border-warning', 'border-3');
+
+            });
+
+        });
+
+    });
+
+});
+
+</script>
+
 {% endblock %}
