@@ -44,24 +44,21 @@
                     <div class="border p-2 text-center rounded
                         {{ image.isPrincipal ? 'border-warning border-3' : 'border-secondary' }}">
 
-                        <div class="image-card" data-id="{{ image.id }}">
+                        <div class="image-card">
 
                             <img src="{{ asset(image.path) }}"
                                  class="img-fluid mb-2"
                                  style="height:150px; object-fit:cover;">
 
                             <div class="principal-badge">
-
                                 {% if image.isPrincipal %}
                                     <span class="badge bg-warning text-dark mb-2">
                                         Principal
                                     </span>
                                 {% endif %}
-
                             </div>
 
                             <div class="actions {% if image.isPrincipal %}d-none{% endif %}">
-
                                 <div class="d-flex justify-content-center gap-2">
 
                                     <button class="btn btn-danger btn-sm delete-image"
@@ -75,7 +72,6 @@
                                     </button>
 
                                 </div>
-
                             </div>
 
                         </div>
@@ -99,15 +95,44 @@
     </a>
 </div>
 
+
 <script>
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    document.querySelectorAll('.main-image').forEach(btn => {
+   
+    const container = document.getElementById('images-container');
+    const btnAdd = document.getElementById('add-image-btn');
 
-        btn.addEventListener('click', () => {
+    btnAdd.addEventListener('click', () => {
 
-            const id = btn.dataset.id;
+        const row = document.createElement('div');
+
+        row.classList.add('d-flex', 'align-items-center', 'gap-2', 'mb-2');
+
+        row.innerHTML = `
+            <input type="file" name="images[]" class="form-control">
+
+            <button type="button"
+                    class="btn btn-danger btn-sm remove-image">
+                ❌
+            </button>
+        `;
+
+        container.appendChild(row);
+
+        row.querySelector('.remove-image').addEventListener('click', () => {
+            row.remove();
+        });
+    });
+
+    document.addEventListener('click', (event) => {
+
+        const mainBtn = event.target.closest('.main-image');
+
+        if (mainBtn) {
+
+            const id = mainBtn.dataset.id;
 
             fetch('/admin/image/main/' + id, {
                 method: 'POST'
@@ -121,12 +146,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     block.querySelector('.actions')?.classList.remove('d-none');
                     block.querySelector('.principal-badge').innerHTML = '';
-
-                    block.querySelector('.border-warning')
-                        ?.classList.remove('border-warning', 'border-3');
+                    block.classList.remove('border-warning', 'border-3');
                 });
 
-                const current = btn.closest('.image-block');
+                const current = mainBtn.closest('.image-block');
 
                 current.querySelector('.actions').classList.add('d-none');
 
@@ -136,12 +159,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     </span>
                 `;
 
-                current.querySelector('.border')
-                    ?.classList.add('border-warning', 'border-3');
-
+                current.classList.add('border-warning', 'border-3');
             });
+        }
 
-        });
+        const deleteBtn = event.target.closest('.delete-image');
+
+        if (deleteBtn) {
+
+            if (!confirm('Supprimer cette image ?')) return;
+
+            const id = deleteBtn.dataset.id;
+
+            fetch('/admin/image/delete/' + id, {
+                method: 'POST'
+            })
+            .then(res => res.json())
+            .then(data => {
+
+                if (!data.success) return;
+
+                deleteBtn.closest('.image-block').remove();
+            });
+        }
 
     });
 

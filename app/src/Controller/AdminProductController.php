@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\Product;
 use App\Entity\Image;
 use App\Form\ProductType;
-use App\Repository\ImageRepository;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -69,13 +68,19 @@ final class AdminProductController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $files = $form->get('image')->getData();
+            /**
+             * 🎯 Récupération des fichiers uploadés dynamiques
+             * name="images[]"
+             */
+            $files = $request->files->get('images');
 
-            $hasImages = count($product->getImages()) > 0;
+            $hasMain = count($product->getImages()) > 0;
 
             if ($files) {
 
                 foreach ($files as $file) {
+
+                    if (!$file) continue;
 
                     $filename = uniqid() . '.' . $file->guessExtension();
 
@@ -89,9 +94,10 @@ final class AdminProductController extends AbstractController
                     $image->setProduct($product);
                     $image->setAlt('Image du produit ' . $product->getTitle());
 
-                    if (!$hasImages) {
+                    // ⭐ première image = principale
+                    if (!$hasMain) {
                         $image->setIsPrincipal(true);
-                        $hasImages = true;
+                        $hasMain = true;
                     } else {
                         $image->setIsPrincipal(false);
                     }
