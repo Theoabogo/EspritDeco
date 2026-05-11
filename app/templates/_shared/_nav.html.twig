@@ -1,45 +1,78 @@
 <nav class="navbar navbar-expand-lg bg-light" data-bs-theme="light">
-  <div class="container-fluid">
-  <a class="navbar-brand d-flex align-items-center" href="{{ path('app_home')}}">
-   <img src="{{ asset('images/logo.webp') }}" alt="Esprit Déco" height="40">
-</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor03" aria-controls="navbarColor03" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarColor03">
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item">
-          <a class="nav-link active" href="#">Boutique
-            <span class="visually-hidden">(current)</span>
-          </a>
-        </li>
+    <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" href="{{ path('app_home') }}">
+            <img src="{{ asset('images/logo.webp') }}" alt="Esprit Déco" height="40">
+        </a>
+        <button class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarColor03"
+                aria-controls="navbarColor03"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarColor03">
 
-        {% if app.user %}
-        <li class="nav-item">
-          <a class="nav-link" href="{{path('app_logout')}}">Deconnexion</a>
-        </li>
-        {% else %}
-        <li class="nav-item">
-          <a class="nav-link" href="{{path('app_login')}}">Connexion</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{{path('app_register')}}">Enregistrement</a>
-        </li>
-        {% endif %}
-        {% if is_granted('ROLE_ADMIN') %}
-    <li class="nav-item">
-      <a class="nav-link " href="{{ path('admin_product_index') }}">
-        Espace administrateur
-      </a>
-    </li>
-  {% endif %}
-      </ul>
-      <form class="d-flex">
-        <input class="form-control me-sm-2" type="search" placeholder="Search">
-        <button class="btn btn-secondary my-2 my-sm-0" type="submit">🔎</button>
-      </form>
+            <ul class="navbar-nav me-auto">
+
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">
+                        Boutique
+                        <span class="visually-hidden">(current)</span>
+                    </a>
+                </li>
+
+                {% if app.user %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_logout') }}">
+                            Déconnexion
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_login') }}">
+                            Connexion
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_register') }}">
+                            Enregistrement
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% if is_granted('ROLE_ADMIN') %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('admin_product_index') }}">
+                            Espace administrateur
+                        </a>
+                    </li>
+                {% endif %}
+
+            </ul>
+            <form class="d-flex me-3">
+                <input class="form-control me-sm-2"
+                       type="search"
+                       placeholder="Search">
+                <button class="btn btn-secondary my-2 my-sm-0" type="submit">
+                    🔎
+                </button>
+            </form>
+            <button class="btn btn position-relative"
+                    type="button"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#cartOffcanvas">
+                🛒 
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {{ app.session.get('cart', [])|length }}
+                </span>
+
+            </button>
+
+        </div>
     </div>
-  </div>
 </nav>
 
 
