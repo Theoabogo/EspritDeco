@@ -11,13 +11,13 @@
         <div id="carouselProduct" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner">
                 {% for image in product.images %}
-                    {% for image in product.images %}
+                   
     <div class="carousel-item {% if loop.first %}active{% endif %} text-center">
         <img src="{{ asset(image.path) }}"
              class="carousel-img"
              alt="{{ image.alt }}">
     </div>
-{% endfor %}
+
                 {% endfor %}
                 {% if product.images|length == 0 %}
                     <div class="carousel-item active">
@@ -45,9 +45,12 @@
     <button type="button" class="btn btn-warning rounded-pill px-4">
         {{ product.price }} €
     </button>
-    <button type="button" class="btn btn-outline-warning rounded-pill px-4">
-        Ajouter au panier
-    </button>
+   <a href="{{ path('cart_add', {id: product.id}) }}"
+   class="btn btn-outline-warning rounded-pill px-4">
+
+    Ajouter au panier
+
+</a>
 </div>
     </div>
 
