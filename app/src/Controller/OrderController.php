@@ -25,7 +25,7 @@ final class OrderController extends AbstractController
     ) {}
 
     #[Route('/order/address', name: 'order_address')]
-    public function address(Request $request, SessionInterface $session): Response
+    public function address(Request $request): Response
     {
         $order = $this->orderRepository->findPendingOrderByUser($this->getUser());
 
@@ -46,14 +46,48 @@ final class OrderController extends AbstractController
             $this->em->persist($order);
             $this->em->flush();
 
-            $this->cartService->clear($this->getUser(), $session);
-
-            return $this->redirectToRoute('order_confirmation', ['id' => $order->getId()]);
+            return $this->redirectToRoute('order_summary', ['id' => $order->getId()]);
         }
 
         return $this->render('order/address.html.twig', [
             'form' => $form,
         ]);
+    }
+
+    #[Route('/order/summary/{id}', name: 'order_summary')]
+    public function summary(Order $order, SessionInterface $session): Response
+    {
+        if ($order->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $items = $this->cartService->getCartItems($this->getUser(), $session);
+
+        $total = array_reduce($items, static function (float $carry, array $item): float {
+            return $carry + $item['product']->getPrice() * $item['quantity'];
+        }, 0.0);
+
+        return $this->render('order/summary.html.twig', [
+            'order' => $order,
+            'items' => $items,
+            'total' => $total,
+        ]);
+    }
+
+    #[Route('/order/confirm/{id}', name: 'order_confirm', methods: ['POST'])]
+    public function confirm(Order $order, Request $request, SessionInterface $session): Response
+    {
+        if ($order->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if (!$this->isCsrfTokenValid('order_confirm_' . $order->getId(), $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Token CSRF invalide.');
+        }
+
+        $this->cartService->clear($this->getUser(), $session);
+
+        return $this->redirectToRoute('order_confirmation', ['id' => $order->getId()]);
     }
 
     #[Route('/order/confirmation/{id}', name: 'order_confirmation')]
