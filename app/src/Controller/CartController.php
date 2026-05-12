@@ -2,28 +2,25 @@
 
 namespace App\Controller;
 
+use App\Service\CartService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use App\Repository\ProductRepository;
-
+use Symfony\Component\Routing\Attribute\Route;
 
 final class CartController extends AbstractController
 {
-    // Structure du panier en session : [productId => quantité]
+    public function __construct(private CartService $cartService) {}
 
     #[Route('/cart/add/{id}', name: 'cart_add')]
-    public function add(int $id, SessionInterface $session, ProductRepository $productRepository, Request $request): Response
+    public function add(int $id, SessionInterface $session, Request $request): Response
     {
-        $cart = $session->get('cart', []);
-        $cart[$id] = ($cart[$id] ?? 0) + 1;
-        $session->set('cart', $cart);
+        $this->cartService->add($id, $this->getUser(), $session);
 
         if ($request->isXmlHttpRequest()) {
-            return $this->json(['success' => true, 'count' => array_sum($cart)]);
+            return $this->json(['success' => true, 'count' => $this->cartService->getCount($this->getUser(), $session)]);
         }
 
         return $this->redirectToRoute('app_product_show', ['id' => $id]);
@@ -32,56 +29,32 @@ final class CartController extends AbstractController
     #[Route('/cart/decrease/{id}', name: 'cart_decrease')]
     public function decrease(int $id, SessionInterface $session): JsonResponse
     {
-        $cart = $session->get('cart', []);
+        $this->cartService->decrease($id, $this->getUser(), $session);
 
-        if (isset($cart[$id])) {
-            $cart[$id]--;
-            if ($cart[$id] <= 0) {
-                unset($cart[$id]);
-            }
-        }
-
-        $session->set('cart', $cart);
-
-        return $this->json(['success' => true, 'count' => array_sum($cart)]);
+        return $this->json(['success' => true, 'count' => $this->cartService->getCount($this->getUser(), $session)]);
     }
 
     #[Route('/cart/remove/{id}', name: 'cart_remove')]
     public function remove(int $id, SessionInterface $session): JsonResponse
     {
-        $cart = $session->get('cart', []);
-        unset($cart[$id]);
-        $session->set('cart', $cart);
+        $this->cartService->remove($id, $this->getUser(), $session);
 
-        return $this->json(['success' => true, 'count' => array_sum($cart)]);
+        return $this->json(['success' => true, 'count' => $this->cartService->getCount($this->getUser(), $session)]);
     }
 
     #[Route('/cart/clear', name: 'cart_clear')]
     public function clear(SessionInterface $session): JsonResponse
     {
-        $session->remove('cart');
+        $this->cartService->clear($this->getUser(), $session);
 
         return $this->json(['success' => true, 'count' => 0]);
     }
 
     #[Route('/cart/offcanvas', name: 'cart_offcanvas')]
-    public function offcanvas(SessionInterface $session, ProductRepository $productRepository): Response
+    public function offcanvas(SessionInterface $session): Response
     {
-        $cart = $session->get('cart', []);
-        $cartItems = [];
-
-        if (!empty($cart)) {
-            $products = $productRepository->findBy(['id' => array_keys($cart)]);
-            foreach ($products as $product) {
-                $cartItems[] = [
-                    'product'  => $product,
-                    'quantity' => $cart[$product->getId()],
-                ];
-            }
-        }
-
         return $this->render('cart/offcanvas.html.twig', [
-            'cartItems' => $cartItems,
+            'cartItems' => $this->cartService->getCartItems($this->getUser(), $session),
         ]);
     }
 }
