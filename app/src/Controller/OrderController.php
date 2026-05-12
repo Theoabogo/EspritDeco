@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Address;
 use App\Entity\Order;
 use App\Form\AddressType;
+use App\Repository\OrderRepository;
 use App\Service\CartService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,20 +21,26 @@ final class OrderController extends AbstractController
     public function __construct(
         private CartService $cartService,
         private EntityManagerInterface $em,
+        private OrderRepository $orderRepository,
     ) {}
 
     #[Route('/order/address', name: 'order_address')]
     public function address(Request $request, SessionInterface $session): Response
     {
-        $address = new Address();
-        $form = $this->createForm(AddressType::class, $address);
-        $form->handleRequest($request);
+        $order = $this->orderRepository->findPendingOrderByUser($this->getUser());
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($order === null) {
             $order = new Order();
             $order->setUser($this->getUser());
             $order->setCreatedAt(new \DateTimeImmutable());
             $order->setStatus('pending');
+        }
+
+        $address = $order->getAddress() ?? new Address();
+        $form = $this->createForm(AddressType::class, $address);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
             $order->setAddress($address);
 
             $this->em->persist($order);
