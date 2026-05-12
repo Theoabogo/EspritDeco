@@ -54,9 +54,13 @@
 
             </table>
 
-            <button class="btn btn-danger w-100" id="cart-clear">
+            <button class="btn btn-danger w-100 mb-2" id="cart-clear">
                 🗑️ Vider le panier
             </button>
+
+            <a href="{{ path('order_address') }}" class="btn btn-success w-100">
+                💳 Payer
+            </a>
 
         {% endif %}
 
