@@ -60,13 +60,17 @@
                     🔎
                 </button>
             </form>
+            {% set cartCount = 0 %}
+            {% for qty in app.session.get('cart', {}) %}
+                {% set cartCount = cartCount + qty %}
+            {% endfor %}
             <button class="btn btn position-relative"
                     type="button"
                     data-bs-toggle="offcanvas"
                     data-bs-target="#cartOffcanvas">
-                🛒 
+                🛒
                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                    {{ app.session.get('cart', [])|length }}
+                    {{ cartCount }}
                 </span>
 
             </button>

@@ -16,9 +16,9 @@
         </button>
     </div>
 
-    <div class="offcanvas-body">
+    <div class="offcanvas-body" id="cartOffcanvasBody">
 
-        {% if products is empty %}
+        {% if cartItems is empty %}
 
             <p>Votre panier est vide.</p>
 
@@ -26,25 +26,37 @@
 
             {% set total = 0 %}
 
-            <table class="table table-dark">
+            <table class="table table-dark align-middle">
 
-                {% for product in products %}
+                {% for item in cartItems %}
 
-                    {% set total = total + product.price %}
+                    {% set total = total + (item.product.price * item.quantity) %}
 
                     <tr>
-                        <td>{{ product.title }}</td>
-                        <td>{{ product.price }} €</td>
+                        <td>{{ item.product.title }}</td>
+                        <td class="text-nowrap">
+                            <button class="btn btn-sm btn-secondary cart-btn cart-decrease" data-id="{{ item.product.id }}">−</button>
+                            <span class="mx-1">{{ item.quantity }}</span>
+                            <button class="btn btn-sm btn-secondary cart-btn cart-add" data-id="{{ item.product.id }}">+</button>
+                        </td>
+                        <td class="text-nowrap">{{ (item.product.price * item.quantity)|number_format(2, '.', ' ') }} €</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger cart-btn cart-remove" data-id="{{ item.product.id }}">🗑️</button>
+                        </td>
                     </tr>
 
                 {% endfor %}
 
                 <tr>
-                    <td><strong>Total</strong></td>
-                    <td><strong>{{ total }} €</strong></td>
+                    <td colspan="2"><strong>Total</strong></td>
+                    <td colspan="2"><strong>{{ total|number_format(2, '.', ' ') }} €</strong></td>
                 </tr>
 
             </table>
+
+            <button class="btn btn-danger w-100" id="cart-clear">
+                🗑️ Vider le panier
+            </button>
 
         {% endif %}
 
