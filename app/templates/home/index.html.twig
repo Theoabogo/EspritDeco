@@ -1,33 +1,165 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}Boutique – Esprit Déco{% endblock %}
+
 {% block body %}
-<div class="container mt-5">
-<div class="catalog">
-    {% for product in products %}
-        <div class="card">
-          <h3 class="card-title text-center">
-             <a href="{{ path('app_product_show', {id: product.id}) }}">
-        {{ product.title }}
-    </a>
-  
-</h3>
-            {% set image = product.getPrincipalImage %}
-            {% if image %}
-                <img src="{{ asset(image.path) }}" alt="{{ image.alt }}" class="card-image">
-            {% else %}
-                <div class="no-image">🚫</div>
-            {% endif %}
-          <p class="card-description text-center">
-    {{ product.description|split(' ')|slice(0, 20)|join(' ') ~ '...' }}
-</p>
-        <div class="card-bottom d-flex justify-content-between">
-             <span class="category">{{ product.category.name }}</span>
-            <span class="price">{{ product.price }} €</span>
-            
+{% set hasPriceFilter = filters.min_price != '' or filters.max_price != '' %}
+{% set hasTextFilter  = filters.q != '' %}
+{% set hasFilter      = hasTextFilter or filters.category is not null or hasPriceFilter %}
+{% set panelOpen      = hasTextFilter or hasPriceFilter %}
+
+<div class="container-fluid px-4 mt-4">
+
+    {# ─── Ligne catégories + bouton Filtres ───────────────────── #}
+    <div class="cat-bar mb-0">
+
+        {# Pills catégories (liens instantanés) #}
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <a href="{{ path('app_home', {min_price: filters.min_price, max_price: filters.max_price, q: filters.q}) }}"
+               class="btn btn-sm rounded-pill {{ filters.category is null ? 'btn-warning' : 'btn-outline-light' }}">
+                Toutes
+            </a>
+            {% for category in categories %}
+                <a href="{{ path('app_home', {category: category.id, min_price: filters.min_price, max_price: filters.max_price, q: filters.q}) }}"
+                   class="btn btn-sm rounded-pill {{ filters.category == category.id ? 'btn-warning' : 'btn-outline-light' }}">
+                    {{ category.name }}
+                </a>
+            {% endfor %}
         </div>
 
+        {# Bouton Filtres + Reset #}
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-sm rounded-pill position-relative {{ panelOpen ? 'btn-warning' : 'btn-outline-light' }}"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#filterPanel"
+                    aria-expanded="{{ panelOpen ? 'true' : 'false' }}"
+                    aria-controls="filterPanel">
+                ⚙ Filtres
+                {% if panelOpen %}
+                    <span class="filter-active-dot"></span>
+                {% endif %}
+            </button>
+
+            {% if hasFilter %}
+                <a href="{{ path('app_home') }}"
+                   class="btn btn-sm rounded-pill btn-outline-danger"
+                   title="Tout réinitialiser">✕</a>
+            {% endif %}
         </div>
-    {% endfor %}
-</div>
+    </div>
+
+    {# ─── Panneau collapse : Recherche + Prix ─────────────────── #}
+    <div class="collapse {{ panelOpen ? 'show' : '' }}" id="filterPanel">
+        <div class="filter-panel p-4 mt-2 mb-3 rounded-3">
+            <form method="get" action="{{ path('app_home') }}">
+
+                {# Préserver la catégorie sélectionnée #}
+                {% if filters.category is not null %}
+                    <input type="hidden" name="category" value="{{ filters.category }}">
+                {% endif %}
+
+                <div class="row g-3 align-items-end">
+
+                    {# Recherche #}
+                    <div class="col-12 col-md-5">
+                        <label class="filter-panel-label">Recherche par mot-clé</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0">🔍</span>
+                            <input class="form-control border-start-0 ps-0"
+                                   type="search"
+                                   name="q"
+                                   placeholder="Nom, description…"
+                                   value="{{ filters.q }}">
+                        </div>
+                    </div>
+
+                    {# Séparateur vertical #}
+                    <div class="col-auto d-none d-md-flex align-items-center">
+                        <div class="filter-panel-sep"></div>
+                    </div>
+
+                    {# Prix #}
+                    <div class="col-12 col-md-5">
+                        <label class="filter-panel-label">Fourchette de prix (€)</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="number"
+                                   class="form-control"
+                                   name="min_price"
+                                   min="0" step="0.01"
+                                   placeholder="Min"
+                                   value="{{ filters.min_price }}">
+                            <span class="text-muted">–</span>
+                            <input type="number"
+                                   class="form-control"
+                                   name="max_price"
+                                   min="0" step="0.01"
+                                   placeholder="Max"
+                                   value="{{ filters.max_price }}">
+                        </div>
+                    </div>
+
+                    {# Bouton Appliquer #}
+                    <div class="col-12 col-md-auto">
+                        <button type="submit" class="btn btn-warning rounded-pill px-4 fw-semibold w-100">
+                            Appliquer
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# ─── Résumé filtres actifs ────────────────────────────────── #}
+    {% if hasFilter %}
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+            <span class="text-muted small">
+                <strong>{{ products|length }}</strong> résultat{{ products|length > 1 ? 's' : '' }}
+            </span>
+            {% if filters.q %}
+                <span class="badge rounded-pill bg-secondary">🔍 {{ filters.q }}</span>
+            {% endif %}
+            {% if filters.min_price != '' %}
+                <span class="badge rounded-pill bg-secondary">≥ {{ filters.min_price }} €</span>
+            {% endif %}
+            {% if filters.max_price != '' %}
+                <span class="badge rounded-pill bg-secondary">≤ {{ filters.max_price }} €</span>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {# ─── Grille produits ──────────────────────────────────────── #}
+    {% if products is empty %}
+        <div class="alert alert-info mt-2">
+            Aucun produit ne correspond à votre recherche.
+        </div>
+    {% else %}
+        <div class="catalog mt-2">
+            {% for product in products %}
+                <div class="card">
+                    <h3 class="card-title text-center">
+                        <a href="{{ path('app_product_show', {id: product.id}) }}">
+                            {{ product.title }}
+                        </a>
+                    </h3>
+                    {% set image = product.getPrincipalImage %}
+                    {% if image %}
+                        <img src="{{ asset(image.path) }}" alt="{{ image.alt }}" class="card-image">
+                    {% else %}
+                        <div class="no-image">🚫</div>
+                    {% endif %}
+                    <p class="card-description text-center">
+                        {{ product.description|split(' ')|slice(0, 20)|join(' ') ~ '...' }}
+                    </p>
+                    <div class="card-bottom d-flex justify-content-between">
+                        <span class="category">{{ product.category.name }}</span>
+                        <span class="price">{{ product.price }} €</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
 </div>
 {% endblock %}
