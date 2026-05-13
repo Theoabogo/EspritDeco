@@ -16,6 +16,10 @@ security:
             # Ensure dev tools and static assets are always allowed
             pattern: ^/(_profiler|_wdt|assets|build)/
             security: false
+        stripe_webhook:
+            # Le webhook Stripe est public — la sécurité repose sur la signature HMAC
+            pattern: ^/stripe/webhook
+            security: false
         main:
             lazy: true
             provider: app_user_provider

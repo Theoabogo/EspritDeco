@@ -1,32 +1,63 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Commande confirmée — Esprit Déco{% endblock %}
+{% block title %}
+    {% if order.status == 'paid' %}Paiement confirmé{% elseif order.status == 'payment_failed' %}Paiement échoué{% else %}Commande enregistrée{% endif %} — Esprit Déco
+{% endblock %}
 
 {% block body %}
 <div class="row justify-content-center text-center">
     <div class="col-12 col-md-6">
-        <div class="alert alert-success mt-4">
-            <h4 class="alert-heading">Commande enregistrée !</h4>
-            <p>Merci pour votre commande n°{{ order.id }}.</p>
-        </div>
 
-        <div class="card mb-4">
-            <div class="card-body text-start">
-                <h5 class="card-title">Récapitulatif</h5>
+        {% if order.status == 'paid' %}
+            <div class="alert alert-success mt-4">
+                <h4 class="alert-heading">Paiement réussi !</h4>
+                <p class="mb-0">Merci pour votre commande n°{{ order.id }}. Vous recevrez une confirmation par e-mail.</p>
+            </div>
+        {% elseif order.status == 'payment_failed' %}
+            <div class="alert alert-danger mt-4">
+                <h4 class="alert-heading">Paiement échoué</h4>
+                <p class="mb-0">Votre paiement n'a pas pu être traité. Veuillez réessayer.</p>
+            </div>
+        {% else %}
+            <div class="alert alert-warning mt-4">
+                <h4 class="alert-heading">Commande en attente</h4>
+                <p class="mb-0">Votre commande n°{{ order.id }} est en cours de traitement.</p>
+            </div>
+        {% endif %}
+
+        <div class="card mb-4 text-start">
+            <div class="card-body">
+                <h5 class="card-title">Récapitulatif de la commande n°{{ order.id }}</h5>
                 <ul class="list-unstyled mb-0">
                     <li><strong>Nom et Prénom :</strong> {{ order.address.fullname }}</li>
                     <li><strong>Adresse :</strong> {{ order.address.street }}</li>
                     <li><strong>Code postal :</strong> {{ order.address.zipCode }}</li>
                     <li><strong>Ville :</strong> {{ order.address.city }}</li>
-                    <li class="mt-2"><strong>Statut :</strong> {{ order.status }}</li>
+                    <li class="mt-2">
+                        <strong>Statut :</strong>
+                        {% if order.status == 'paid' %}
+                            <span class="badge bg-success">Payé</span>
+                        {% elseif order.status == 'payment_failed' %}
+                            <span class="badge bg-danger">Paiement échoué</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">En attente</span>
+                        {% endif %}
+                    </li>
                     <li><strong>Date :</strong> {{ order.createdAt|date('d/m/Y à H:i') }}</li>
                 </ul>
             </div>
         </div>
 
+        {% if order.status == 'payment_failed' %}
+            <a href="{{ path('order_summary', {id: order.id}) }}" class="btn btn-warning me-2">
+                Réessayer le paiement
+            </a>
+        {% endif %}
+
         <a href="{{ path('app_home') }}" class="btn btn-primary">
             Retour au catalogue
         </a>
+
     </div>
 </div>
 {% endblock %}
